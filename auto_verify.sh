@@ -1,6 +1,7 @@
 #!/bin/bash
 
-docker_images=("ubuntu:20.04" "ubuntu:22.04")  # Add image names here
+# Load configuration from config.yaml
+source config.yaml
 
 # Path to the build script on host
 build_script="./build_script.sh"
@@ -20,7 +21,11 @@ run_verification() {
     docker cp "$build_script" "$container_id:/build_script.sh"
 
     # Execute build script inside the container and save logs
-    docker exec "$container_id" bash /build_script.sh -yt &> "$log_file"
+    if [[ "$TEST" == true ]]; then
+        docker exec "$container_id" bash /build_script.sh -yt &> "$log_file"
+    else
+        docker exec "$container_id" bash /build_script.sh -y &> "$log_file"
+    fi
 
     # Print logs path
     echo "Logs saved to: $log_file"
@@ -29,7 +34,7 @@ run_verification() {
     docker rm -f "$container_id"
 }
 
-for image_name in "${docker_images[@]}"; do
+for image_name in "${IMAGES[@]}"; do
     echo "Testing image: $image_name"
     run_verification "$image_name"
 done

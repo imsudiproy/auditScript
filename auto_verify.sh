@@ -30,8 +30,10 @@ run_verification() {
     image_name=$1
     container_name=$(echo "$image_name" | tr ':/' '_')"_container"
     log_file="${log_dir}/$(echo "$image_name" | tr ':/' '_')_logs.txt"
+    # If the user is root
     script_path="/build_script.sh"
 
+    # If the user is test
     if [ "$user" == "test" ]; then
         script_path="/home/test/build_script.sh"
     fi

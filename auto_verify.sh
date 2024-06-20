@@ -33,6 +33,13 @@ run_verification() {
     # If the user is root
     script_path="/build_script.sh"
 
+    #build arg to set tests true or false
+    if [ "$test" == "true" ]; then
+        build_arg="yt"
+    else
+        build_arg="y"
+    fi
+
     # If the user is test
     if [ "$user" == "test" ]; then
         script_path="/home/test/build_script.sh"
@@ -55,9 +62,9 @@ run_verification() {
 
     # Execute build script inside the container and save logs
     if [ "$user" == "test" ]; then
-        docker exec "$container_id" su - test -c "bash $script_path ${test:+-yt}" &> "$log_file"
+        docker exec "$container_id" su - test -c "bash $script_path -$build_arg" &> "$log_file"
     else
-        docker exec "$container_id" bash $script_path ${test:+-yt} &> "$log_file"
+        docker exec "$container_id" bash $script_path -$build_arg &> "$log_file"
     fi
 
     if [ $? -ne 0 ]; then

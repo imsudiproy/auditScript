@@ -46,7 +46,7 @@ run_verification() {
     fi
 
     # Create container
-    container_id=$(docker run -d --name "$container_name" "$image_name")
+    container_id=$(docker run -d --privileged --name "$container_name" "$image_name")
     if [ $? -ne 0 ]; then
         echo "Failed to create container for image: $image_name" | tee -a "$log_file"
         return 1

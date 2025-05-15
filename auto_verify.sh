@@ -32,7 +32,7 @@ run_verification() {
     log_file="${log_dir}/$(echo "$image_name" | tr ':/' '_')_logs.txt"
     # If the user is root
     script_path="/build_script.sh"
-    if [ "$patch_available" == "yes"]; then
+    if [ "$patch_available" == "yes" ]; then
         patch_dest_path="/diff.txt"
     fi
 

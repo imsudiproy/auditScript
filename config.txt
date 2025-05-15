@@ -2,5 +2,5 @@ images=("ubuntu:20.04" "ubuntu:22.04")  # Enter images to test on
 test=false  # set true if you want to execute test
 user=test  # User to run the script (root or test)
 build_script="/home/sudip/Desktop/auditScript/build_script.sh"  # Path to the build script to be tested
-patch_available="yes"
+patch_available="no" # set yes or no
 patch_path="/home/test/patch.diff"

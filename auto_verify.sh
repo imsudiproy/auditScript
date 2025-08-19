@@ -32,8 +32,11 @@ run_verification() {
     log_file="${log_dir}/$(echo "$image_name" | tr ':/' '_')_logs.txt"
     # If the user is root
     script_path="/build_script.sh"
+    if [ "$patch_available" == "yes" ]; then
+        patch_dest_path="/diff.txt"
+    fi
 
-    #build arg to set tests true or false
+    # Build arg to set tests true or false
     if [ "$test" == "true" ]; then
         build_arg="yt"
     else
@@ -43,6 +46,9 @@ run_verification() {
     # If the user is test
     if [ "$user" == "test" ]; then
         script_path="/home/test/build_script.sh"
+        if [ "$patch_available" == "yes" ]; then
+            patch_dest_path="/home/test/diff.txt"
+        fi
     fi
 
     # Create container
@@ -58,6 +64,22 @@ run_verification() {
         echo "Failed to copy build script to container: $container_id" | tee -a "$log_file"
         docker rm -f "$container_id"
         return 1
+    fi
+
+    # Handle patch if available
+    if [ "$patch_available" == "yes" ]; then
+        if [[ -z "$patch_path" || ! -f "$patch_path" ]]; then
+            echo "Patch file not found or path not set: $patch_path" | tee -a "$log_file"
+            docker rm -f "$container_id"
+            return 1
+        fi
+
+        docker cp "$patch_path" "$container_id:$patch_dest_path"
+        if [ $? -ne 0 ]; then
+            echo "Failed to copy patch file to container: $container_id" | tee -a "$log_file"
+            docker rm -f "$container_id"
+            return 1
+        fi
     fi
 
     # Execute build script inside the container and save logs

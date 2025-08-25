@@ -4,3 +4,4 @@ user=test  # User to run the script (root or test)
 build_script="/home/sudip/Desktop/auditScript/build_script.sh"  # Path to the build script to be tested
 patch_available="no" # set yes or no
 patch_path="/home/test/patch.diff"
+install_docker="no" #set yes or no

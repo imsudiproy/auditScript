@@ -131,6 +131,7 @@ run_verification() {
     fi
 
     # Execute build script inside the container and save logs
+    echo "Started executing the provided script..."
     if [ "$user" == "test" ]; then
         docker exec "$container_id" su - test -c "bash $script_path -$build_arg" &> "$log_file"
     else

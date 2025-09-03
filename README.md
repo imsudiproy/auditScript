@@ -4,13 +4,13 @@ A Docker-based automated verification tool for testing build scripts across mult
 
 ## Overview
 
-auditScript is a tool designed to simplify the process of testing build scripts across different Docker environments. It automates the creation of Docker containers, copying build scripts and patches into them, executing the scripts, and collecting logs for analysis.
+auditScript simplifies testing build scripts across different Docker environments. It automates container creation, script and patch copying, optional Docker installation inside containers, script execution, and log collection.
 
 ## Prerequisites
 
 - Docker installed and running
 - Bash shell environment
-- Proper permissions to execute scripts and create Docker containers
+- Permissions to execute scripts and create Docker containers
 
 ## Installation
 
@@ -29,14 +29,15 @@ auditScript is a tool designed to simplify the process of testing build scripts 
 
 All configuration is done through the `config.txt` file. The following options are available:
 
-| Option | Description | Example Value |
-|--------|-------------|---------------|
-| `images` | Array of Docker images to test your script on | `("ubuntu:20.04" "ubuntu:22.04")` |
-| `test` | Enable test execution mode | `false` or `true` |
-| `user` | User context to run the script within the container | `test` or `root` |
-| `build_script` | Full path to the build script on the host machine | `/home/user/auditScript/build_script.sh` |
-| `patch_available` | Indicates whether a patch file should be applied | `no` or `yes` |
-| `patch_path` | Full path to the patch file on the host machine | `/home/test/patch.diff` |
+| Option           | Description                                               | Example Value                                 |
+|------------------|-----------------------------------------------------------|-----------------------------------------------|
+| `images`         | Array of Docker images to test your script on             | `("ubuntu:20.04" "ubuntu:22.04")`            |
+| `test`           | Enable test execution mode                                | `false` or `true`                             |
+| `user`           | User context to run the script within the container       | `test` or `root`                              |
+| `build_script`   | Full path to the build script on the host machine         | `/home/user/auditScript/build_script.sh`      |
+| `patch_available`| Indicates whether a patch file should be applied          | `no` or `yes`                                 |
+| `patch_path`     | Full path to the patch file on the host machine           | `/home/test/patch.diff`                       |
+| `install_docker` | Install Docker inside the container before running script | `no` or `yes`                                 |
 
 ## Usage
 
@@ -48,6 +49,7 @@ All configuration is done through the `config.txt` file. The following options a
    build_script="/path/to/your/build_script.sh"  # Path to the build script
    patch_available="no"  # set yes if you want to apply a patch
    patch_path="/path/to/your/patch.diff"  # Path to the patch file
+   install_docker="no"  # set yes to install Docker inside the container
    ```
 
 2. Run the verification script:
@@ -60,28 +62,35 @@ All configuration is done through the `config.txt` file. The following options a
 1. The script reads the configuration from `config.txt`
 2. For each Docker image specified:
    - Creates a container
+   - Optionally installs Docker inside the container (`install_docker="yes"`)
    - Copies your build script into the container
    - If patch is enabled, copies the patch file
    - Executes the build script inside the container
    - Collects and saves logs
    - Cleans up the container
 
-## Patch Handling (New Feature)
+## Patch Handling
 
-The script now supports applying patches during verification:
+The script supports applying patches during verification:
 
 1. Set `patch_available="yes"` in your config.txt
 2. Specify the path to your patch file using `patch_path`
-3. When the script runs, it will:
+3. The script will:
    - Validate the patch file exists
    - Copy the patch to the container
    - The patch will be placed in the same directory as the build script
 
-This feature is useful for testing temporary fixes or modifications without altering the original build script.
+This is useful for testing temporary fixes or modifications without altering the original build script.
+
+## Docker Installation Inside Container
+
+If `install_docker="yes"` is set, the script will attempt to install Docker inside each container before running your build script. This is useful for build scripts that require Docker commands inside the container.
+
+Supported distros: Ubuntu, RHEL/CentOS, SLES/SUSE.
 
 ## Log Files
 
-Logs for each container execution are saved in the `/root/logs/` directory with filenames derived from the Docker image name (with special characters converted to underscores).
+Logs for each container execution are saved in the `/root/logs/` directory with filenames derived from the Docker image name (special characters converted to underscores).
 
 ## Troubleshooting
 
@@ -103,3 +112,6 @@ Logs for each container execution are saved in the `/root/logs/` directory with 
 
 5. **"Build script execution failed"**
    - Check the generated log file for script-specific errors
+
+6. **"Unsupported distro for Docker install"**
+   - The script only supports Docker installation for Ubuntu, RHEL/CentOS, and SLES/SUSE. Ensure your Docker image is based on one of these distros if you want to use the Docker installation feature.

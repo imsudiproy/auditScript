@@ -82,7 +82,54 @@ run_verification() {
         fi
     fi
 
+    #install docker
+    if [ "$install_docker" == "yes" ]; then
+        echo "Installing Docker inside container: $container_id" | tee -a "$log_file"
+
+        distro=$(docker exec "$container_id" sh -c 'grep "^ID=" /etc/os-release | cut -d= -f2' | tr -d '"')
+
+        case "$distro" in
+            ubuntu)
+                docker exec "$container_id" bash -c "
+                    apt-get update &&
+                    apt-get install -y ca-certificates curl gnupg sudo &&
+                    install -m 0755 -d /etc/apt/keyrings &&
+                    curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc &&
+                    chmod a+r /etc/apt/keyrings/docker.asc &&
+                    echo \"deb [arch=\$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \$(. /etc/os-release && echo \${UBUNTU_CODENAME:-\$VERSION_CODENAME}) stable\" > /etc/apt/sources.list.d/docker.list &&
+                    apt-get update &&
+                    apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin &&
+                    sudo usermod -aG docker $USER && newgrp docker
+                "
+                ;;
+            rhel)
+                docker exec "$container_id" bash -c "
+                    sudo dnf -y install dnf-plugins-core sudo &&
+                    sudo dnf config-manager --add-repo https://download.docker.com/linux/rhel/docker-ce.repo &&
+                    sudo dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin &&
+                    sudo usermod -aG docker $USER && newgrp docker
+                "
+                ;;
+            sles)
+                docker exec "$container_id" bash -c "
+                    sudo zypper addrepo https://download.docker.com/linux/sles/docker-ce.repo &&
+                    sudo zypper install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin sudo &&
+                    sudo usermod -aG docker $USER && newgrp docker
+                "
+                ;;
+            *)
+                echo "Unsupported distro for Docker install: $distro" | tee -a "$log_file"
+                ;;
+        esac
+
+        # Start Docker daemon
+        echo "Starting dockerker..."
+        docker exec -d "$container_id" sh -c "sudo dockerd" 
+        sleep 5
+    fi
+
     # Execute build script inside the container and save logs
+    echo "Started executing the provided script..."
     if [ "$user" == "test" ]; then
         docker exec "$container_id" su - test -c "bash $script_path -$build_arg" &> "$log_file"
     else

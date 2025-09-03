@@ -103,7 +103,7 @@ run_verification() {
                 "
                 docker exec "$container_id" sh -c "sudo dockerd"
                 ;;
-            rhel|centos)
+            rhel)
                 docker exec "$container_id" bash -c "
                     sudo dnf -y install dnf-plugins-core sudo &&
                     sudo dnf config-manager --add-repo https://download.docker.com/linux/rhel/docker-ce.repo &&
@@ -112,7 +112,7 @@ run_verification() {
                 "
                 docker exec "$container_id" sh -c "sudo dockerd"
                 ;;
-            sles|suse)
+            sles)
                 docker exec "$container_id" bash -c "
                     sudo zypper addrepo https://download.docker.com/linux/sles/docker-ce.repo &&
                     sudo zypper install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin sudo &&

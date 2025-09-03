@@ -101,7 +101,6 @@ run_verification() {
                     apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin &&
                     sudo usermod -aG docker $USER && newgrp docker
                 "
-                docker exec "$container_id" sh -c "sudo dockerd"
                 ;;
             rhel)
                 docker exec "$container_id" bash -c "
@@ -110,7 +109,6 @@ run_verification() {
                     sudo dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin &&
                     sudo usermod -aG docker $USER && newgrp docker
                 "
-                docker exec "$container_id" sh -c "sudo dockerd"
                 ;;
             sles)
                 docker exec "$container_id" bash -c "
@@ -118,16 +116,16 @@ run_verification() {
                     sudo zypper install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin sudo &&
                     sudo usermod -aG docker $USER && newgrp docker
                 "
-                docker exec "$container_id" sh -c "sudo dockerd"
                 ;;
             *)
                 echo "Unsupported distro for Docker install: $distro" | tee -a "$log_file"
                 ;;
         esac
 
-        # # Start Docker daemon
-        # docker exec -d "$container_id" sh -c "dockerd &"
-        # sleep 5
+        # Start Docker daemon
+        echo "Starting dockerker..."
+        docker exec -d "$container_id" sh -c "sudo dockerd" 
+        sleep 5
     fi
 
     # Execute build script inside the container and save logs

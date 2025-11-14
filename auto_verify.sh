@@ -83,7 +83,11 @@ run_verification() {
     fi
 
     # Determine current user inside the container
-    current_container_user=$(docker exec "$container_id" whoami)
+    current_container_user=$(docker exec "$container_id" whoami) || {
+        echo "Failed to determine current user in container: $container_id" | tee -a "$log_file"
+        docker rm -f "$container_id"
+        return 1
+    }
     
     if [ "$user" == "test" ] && [ "$current_container_user" != "test" ]; then
         # Only switch if not already test

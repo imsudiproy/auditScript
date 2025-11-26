@@ -82,10 +82,18 @@ run_verification() {
         fi
     fi
 
-    # Execute build script inside the container and save logs
-    if [ "$user" == "test" ]; then
+    # Determine current user inside the container
+    current_container_user=$(docker exec "$container_id" whoami) || {
+        echo "Failed to determine current user in container: $container_id" | tee -a "$log_file"
+        docker rm -f "$container_id"
+        return 1
+    }
+    
+    if [ "$user" == "test" ] && [ "$current_container_user" != "test" ]; then
+        # Only switch if not already test
         docker exec "$container_id" su - test -c "bash $script_path -$build_arg" &> "$log_file"
     else
+        # Already test OR user isn't test
         docker exec "$container_id" bash $script_path -$build_arg &> "$log_file"
     fi
 

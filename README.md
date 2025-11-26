@@ -37,6 +37,7 @@ All configuration is done through the `config.txt` file. The following options a
 | `build_script` | Full path to the build script on the host machine | `/home/user/auditScript/build_script.sh` |
 | `patch_available` | Indicates whether a patch file should be applied | `no` or `yes` |
 | `patch_path` | Full path to the patch file on the host machine | `/home/test/patch.diff` |
+| `parallel` | Number of parallel containers to run | `parallel=1` |
 
 ## Usage
 
@@ -48,6 +49,7 @@ All configuration is done through the `config.txt` file. The following options a
    build_script="/path/to/your/build_script.sh"  # Path to the build script
    patch_available="no"  # set yes if you want to apply a patch
    patch_path="/path/to/your/patch.diff"  # Path to the patch file
+   parallel=1 #number of parallel containers to run
    ```
 
 2. Run the verification script:

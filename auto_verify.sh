@@ -108,7 +108,19 @@ if [ ${#images[@]} -eq 0 ]; then
     exit 1
 fi
 
+max_parallel="${parallel:-1}"
+
 for image_name in "${images[@]}"; do
     echo "Testing image: $image_name"
-    run_verification "$image_name"
+
+    # Start in background
+    run_verification "$image_name" &
+
+    # Wait until we drop below the limit
+    while [ "$(jobs -rp | wc -l)" -ge "$max_parallel" ]; do
+        sleep 1
+    done
 done
+
+# Wait for all background jobs to finish
+wait
